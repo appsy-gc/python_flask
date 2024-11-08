@@ -1,4 +1,4 @@
-from flask import Flask, jsonify
+from flask import Flask, jsonify, abort
 from flask_sqlalchemy import SQLAlchemy
 # Marshmallow library to convert from python objects to JSON - 'Serialisation' & 'Deserialisation'
 from flask_marshmallow import Marshmallow
@@ -31,7 +31,9 @@ class ProductSchema(ma.Schema):
         # fields for serialisation
         fields = ("id","name", "description", "price", "stock")
 
+# Handle single product
 product_schema = ProductSchema()
+# Handle many products
 products_schema = ProductSchema(many=True)
 
 # Custom CLI Commands
@@ -93,24 +95,31 @@ def get_products():
     # get all products from the database
     stmt = db.select(Product) # Same as SELECT * FROM PRODUCT which can be extended by adding '.' then where...etc
     products = db.session.scalars(stmt) # scalar for single data, scalars for multiple. Result is in python format
-    result = products_schema.dump(products) # 
-    return jsonify(result)
+    result = products_schema.dump(products) # Select the 'many' schema and add serialised schema to products
+    # return jsonify(result) < DOESN'T SEEM TO REQUIRE THIS OR MAKE A DIFFERENCE
+    return result
+
+# Dynamic Routing for single products
+@app.route("/products/<int:product_id>") # Default method = GET
+def get_product(product_id): # Use route placeholder as function argument
+    stmt = db.select(Product).filter_by(id=product_id)
+    product = db.session.scalar(stmt)
+
+    # Exception handling for when product_id does not exist
+    if product:
+        result = product_schema.dump(product)
+        return result
+    else:    
+        return {"message": f"Product with id: {product_id} does not exist, soz chump"}, 404
+        
+
+# POST ("/products")
 
 
-# POST
+# PUT or PATCH ("/products/id")
 
 
-# PUT
+# DELETE => DELETE ("/products/id")
 
-
-# PATCH
-
-
-# DELETE => DELETE
-
-# Dynamic routing
-@app.route("/product/<product>")
-def get_product(product):
-    return f"<p>You have viewed {product}"
 
     
