@@ -1,4 +1,4 @@
-from flask import Flask, jsonify, abort
+from flask import Flask, request
 from flask_sqlalchemy import SQLAlchemy
 # Marshmallow library to convert from python objects to JSON - 'Serialisation' & 'Deserialisation'
 from flask_marshmallow import Marshmallow
@@ -113,13 +113,26 @@ def get_product(product_id): # Use route placeholder as function argument
         return {"message": f"Product with id: {product_id} does not exist, soz chump"}, 404
         
 
-# POST ("/products")
+# (CRUD) CREATE => POST ("/products")
+@app.route("/products", methods=["POST"])
+def create_product():
+    # Import request from flask
+    body_data = request.get_json()
+    # New instance of Product class and use keys from body_data to assign values
+    new_product = Product(
+        name = body_data.get("name"),
+        description = body_data.get("description"),
+        price = body_data.get("price"),
+        stock = body_data.get("stock")
+    )
+    db.session.add(new_product)
+    db.session.commit()
+    return product_schema.dump(new_product), 201 # 201 Created code returned
+
+# (CRUD) UPDATE => PUT or PATCH ("/products/id")
 
 
-# PUT or PATCH ("/products/id")
-
-
-# DELETE => DELETE ("/products/id")
+# (CRUD) DELETE => DELETE ("/products/id")
 
 
     
