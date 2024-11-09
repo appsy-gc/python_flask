@@ -130,6 +130,25 @@ def create_product():
     return product_schema.dump(new_product), 201 # 201 Created code returned
 
 # (CRUD) UPDATE => PUT or PATCH ("/products/id")
+# PUT replaces an entire product - will create a new product if ID does not exist
+# PATCH replaces a value within a product
+@app.route("/products/<int:product_id>", methods=["PUT", "PATCH"])
+def update_product(product_id):
+    stmt = db.select(Product).filter_by(id=product_id)
+    product = db.session.scalar(stmt)
+    body_data = request.get_json()
+
+    if product:
+        # Update and message
+        product.name = body_data.get("name") or product.name
+        product.description = body_data.get("description") or product.description
+        product.price = body_data.get("price") or product.price
+        product.stock = body_data.get("stock") or product.stock
+        db.session.commit()
+        return product_schema.dump(product)
+    else:
+        # Error message
+        return {"message": f"Product with id: {product_id} does not exist, soz chump"}, 404
 
 
 # (CRUD) DELETE => DELETE ("/products/id")
