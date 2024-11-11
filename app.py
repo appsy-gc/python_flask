@@ -217,17 +217,14 @@ def get_category(cat_id):
 @app.route("/categories", methods=["POST"])
 def create_category():
     # Add exception block for user-based error
-    try:
-        body_data = request.get_json() # 
-        new_category = Category(
-            name = body_data.get("name"),
-            description = body_data.get("description")
-        )
-        db.session.add(new_category)
-        db.session.commit()
-        return category_schema.dump(new_category), 201
-    except:
-        return {"message": "An error has occured"}, 500
+    body_data = request.get_json() 
+    new_category = Category(
+        name = body_data.get("name"),
+        description = body_data.get("description")
+    )
+    db.session.add(new_category)
+    db.session.commit()
+    return category_schema.dump(new_category), 201
 
 # Update category > /categories/<int:cat_id [PUT] or [PATCH]
 @app.route("/categories/<int:cat_id>", methods=["PUT", "PATCH"])
@@ -254,7 +251,7 @@ def delete_category(cat_id):
 
     if category:
         db.session.delete(category)
-        db.commit()
+        db.session.commit()
         return {"message": f"Category with '{category.name}' has been deleted successfully"}
     else:
         return {"message": f"Category id {cat_id} does not exist"}, 404
