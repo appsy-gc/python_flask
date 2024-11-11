@@ -192,4 +192,38 @@ def delete_product(product_id):
         return {"message": f"Product '{product.name}' deleted successfully"}
     else:
         return {"message": f"Product with id: {product_id} does not exist, soz chump"}, 404
+
+# Read all categories > /categories
+@app.route("/categories")
+def all_categories():
+    stmt = db.select(Category) # SELECT * FROM CATEGORIES
+    categories = db.session.scalars(stmt) # scalar for single data, scalars for multiple. Result is in python format
+    result = categories_schema.dump(categories) # Select the 'many' schema and add serialised schema to categories
+    return result
     
+# Read single category > /categories/<int:cat_id>
+@app.route("/categories/<int:cat_id>")
+def get_category(cat_id):
+    stmt = db.select(Category).filter_by(id=cat_id)
+    category = db.session.scalar(stmt)
+
+    if category:
+        result = category_schema.dump(category)
+        return result
+    else:
+        return {"message": f"Category id {cat_id} does not exist, loser."}, 404
+
+# Create category > /categories [POST]
+@app.route("/categories", methods = ["POST"])
+def add_category():
+    body_data = request.get_json()
+    new_category = Category(
+        name = body_data.get("name"),
+        description = body_data.get("description")
+    )
+    db.session.add(new_category)
+    db.session.commit()
+    return category_schema.dump(new_category), 201
+# Update category > /categories/<int:cat_id [PUT] or [PATCH]
+# Delete category > /categories/int:cat_id [DELETE]
+
