@@ -247,4 +247,15 @@ def update_category(cat_id):
 
 
 # Delete category > /categories/int:cat_id [DELETE]
+@app.route("/categories/<int:cat_id>", methods=["DELETE"])
+def delete_category(cat_id):
+    stmt = db.select(Category).filter_by(id=cat_id)
+    category = db.session.scalar(stmt)
+
+    if category:
+        db.session.delete(category)
+        db.commit()
+        return {"message": f"Category with '{category.name}' has been deleted successfully"}
+    else:
+        return {"message": f"Category id {cat_id} does not exist"}, 404
 
