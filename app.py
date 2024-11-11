@@ -216,16 +216,34 @@ def get_category(cat_id):
 # Create category > /categories [POST]
 @app.route("/categories", methods=["POST"])
 def create_category():
-    body_data = request.get_json()
-    new_category = Category(
-        name = body_data.get("name"),
-        description = body_data.get("description")
-    )
-    db.session.add(new_category)
-    db.session.commit()
-    return category_schema.dump(new_category), 201
+    # Add exception block for user-based error
+    try:
+        body_data = request.get_json() # 
+        new_category = Category(
+            name = body_data.get("name"),
+            description = body_data.get("description")
+        )
+        db.session.add(new_category)
+        db.session.commit()
+        return category_schema.dump(new_category), 201
+    except:
+        return {"message": "An error has occured"}, 500
 
 # Update category > /categories/<int:cat_id [PUT] or [PATCH]
+@app.route("/categories/<int:cat_id>", methods=["PUT", "PATCH"])
+def update_category(cat_id):
+    stmt = db.select(Category).filter_by(id=cat_id)
+    category = db.session.scalar(stmt)
+    body_data = request.get_json()
+
+    if category:
+        category.name = body_data.get("name") or category.name
+        category.description = body_data.get("description") or category.description
+        db.session.commit()
+        return category_schema.dump(category)
+    else:
+        # Error message
+        return {"message:" f"Category with id {cat_id} does not exist"}, 404
 
 
 # Delete category > /categories/int:cat_id [DELETE]
