@@ -204,18 +204,18 @@ def all_categories():
 # Read single category > /categories/<int:cat_id>
 @app.route("/categories/<int:cat_id>")
 def get_category(cat_id):
-    stmt = db.select(Category).filter_by(id=cat_id)
-    category = db.session.scalar(stmt)
+    stmt = db.select(Category).filter_by(id=cat_id) # Select * from categories, where id = cat_id
+    category = db.session.scalar(stmt) 
 
     if category:
-        result = category_schema.dump(category)
+        result = category_schema.dump(category) # Convert python object into serialised schema
         return result
     else:
         return {"message": f"Category id {cat_id} does not exist, loser."}, 404
 
 # Create category > /categories [POST]
-@app.route("/categories", methods = ["POST"])
-def add_category():
+@app.route("/categories", methods=["POST"])
+def create_category():
     body_data = request.get_json()
     new_category = Category(
         name = body_data.get("name"),
@@ -224,6 +224,9 @@ def add_category():
     db.session.add(new_category)
     db.session.commit()
     return category_schema.dump(new_category), 201
+
 # Update category > /categories/<int:cat_id [PUT] or [PATCH]
+
+
 # Delete category > /categories/int:cat_id [DELETE]
 
