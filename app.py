@@ -95,6 +95,20 @@ def seed_table():
     # Add third product
     db.session.add(product2)
 
+    # Create list of categories object
+    categories = [
+        Category(
+            name = "Hand Held"
+        ),
+        Category(
+            name = "Ground Warfare"
+        ),
+        Category(
+            name = "Vehicle Mounted"
+        )
+    ]
+    # Add the list to the session
+    db.session.add_all(categories) # .add_all to add the list
     # Commit changes
     db.session.commit()
     print("Table impregnated")
