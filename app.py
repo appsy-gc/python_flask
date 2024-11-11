@@ -25,16 +25,31 @@ class Product(db.Model):
     price = db.Column(db.Float())
     stock = db.Column(db.Integer())
 
+class Category(db.Model): # SQLAlchemy
+    # Define table name
+    __tablename__ = "categories"
+    # Primary Key
+    id = db.Column(db.Integer, primary_key=True)
+    # Other items and attributes
+    name = db.Column(db.String(100), nullable=False)
+    description = db.Column(db.String(100))
+
 # Marshmallow Schema to tell ma what to focus on for the conversion
 class ProductSchema(ma.Schema):
     class Meta:
         # fields for serialisation
         fields = ("id","name", "description", "price", "stock")
 
-# Handle single product
+class CategorySchema(ma.Schema): # Inherit from Schema class in Marshmallow
+    class Meta:
+        fields = ("id", "name", "description")
+
+# Handle single table
 product_schema = ProductSchema()
-# Handle many products
+category_schema = CategorySchema()
+# Handle many tables
 products_schema = ProductSchema(many=True)
+categories_schema = CategorySchema(many=True)
 
 # Custom CLI Commands
 @app.cli.command("create")
